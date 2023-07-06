@@ -1,0 +1,7 @@
+{
+  "Service_Name":"Service_Name_Value",
+  "Pre_Service_Status":"Pre_Service_Status_Value",
+  "Service_Status":"Service_Status_Value",
+  "Error_Output":"error_output_value",
+  "Hostname":"hostname"
+}
