@@ -18,6 +18,8 @@ $service = Get-Service -Name $Service_Name_Value -ErrorAction SilentlyContinue
 ################################################
 $From = "<Email Here>"
 $Recipients = "<Email Here>"
+# Reply-to is not currently enabled, and is not currently functioning. 
+# Please do a pull request if you get it working. :P
 $ReplyTo = "<Email Here>"
 
 ################################################
