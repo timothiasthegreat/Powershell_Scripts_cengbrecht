@@ -1,34 +1,39 @@
 ﻿################################################
 #Welcome to the Service Autostart Script with SMTP2Go API integration
 ################################################
-
+#Configuration Section
 ################################################
 #Service you wish to start, and the value of that service (Running or otherwise)
 ################################################
-$Service_Name_Value = "<ServiceName>"
-$Service_Status_Value #Empty to start
-
-################################################
-#Poll Service Status and information
-#
-$service = Get-Service -Name $Service_Name_Value -ErrorAction SilentlyContinue
+$Service_Name_Value = "Name of Service"
 
 ################################################
 #Who you would like to send to, and from.
 ################################################
-$From = "<Email Here>"
-$Recipients = "<Email Here>"
-# Reply-to is not currently enabled, and is not currently functioning. 
-# Please do a pull request if you get it working. :P
-$ReplyTo = "<Email Here>"
+$From_Name = "<From Name>"
+$From_email = "<From Email Address>"
+#Single Email Recipient
+$Recipient = "<To Email Address>"
 
 ################################################
-#API Key & Template and other Data
-#
-$api_key = "<Your API Key Here>"
-$template_id = "<Template ID>"
-$hostname = Hostname
+#If you want to define a different Reply-To than
+#the From address uncomment the below variables and adjust
+################################################
+#$ReplyTo_Name = "<Reply To Name>"
+#$ReplyTo_email = "<Reply To Email>"
 
+################################################
+#SMTP2GO API Key & Template and other Data 
+################################################
+$api_key = "<API-KEY>"
+$template_id = "<TEMPLATE-ID>"
+$hostname = $env:COMPUTERNAME #Edit to override Computer's configured Hostname
+
+################################################
+#DO NOT EDIT BELOW THIS LINE UNLESS YOU KNOW WHAT YOU ARE DOING
+################################################
+$Service_Status_Value #Empty to start
+$service = Get-Service -Name $Service_Name_Value -ErrorAction SilentlyContinue
 
 ################################################
 #The API Command to Post to SMTP2Go
@@ -40,8 +45,11 @@ function Send-APIEmail() {
         $error_output_value,
         $jsonBase,
         $api_key,
-        $Recipients,
-        $From,
+        $Recipient,
+        $From_Name,
+        $From_email,
+        $ReplyTo_Name,
+        $ReplyTo_email,
         $template_id,
         $Service_Name_Value,
         $Service_Status_Value,
@@ -63,9 +71,9 @@ $headers = @{
     $jsonBase = [ordered]@{
       'api_key' = "$api_key"
       'to' = @(
-        "$Recipients"
+        "$Recipient"
         )
-      'sender' = "$From"
+      'sender' = "$From_Name <$From_email>"
       'template_id' = "$template_id"
       'template_data' = @{
         'Service_Name' = "$Service_Name_Value"
@@ -74,17 +82,20 @@ $headers = @{
         'Pre_Service_Status'= "$Pre_Service_Status_Value"
         'Hostname'= "$hostname"
       }
-      #'custom_headers' = @{
-      #  'header' = "Reply-To"
-      #  'Reply-To' = "$ReplyTo"
-      #}
+    }
+    if ($ReplyTo_email -ne $null) {
+        $jsonBase['custom_headers'] = @(
+        @{
+        'header' = "Reply-To"
+        'value' = "$ReplyTo_Name <$ReplyTo_email>"
+        }
+      )
     }
     ################################################
     # Uncomment for testing variables Change the variable to see what it's printing out.
     #Write-Host $error_output_value
     ################################################
     #Post the API-Request
-    #
     Invoke-RestMethod "https://api.smtp2go.com/v3/email/send" -Method Post -Headers $headers -Body ($jsonBase|ConvertTo-Json) -ContentType "application/json"
 }
 
@@ -130,6 +141,6 @@ Start-Service_Status -service $service
 if ($Service_Status_Value -eq "Running") {
     exit 0
 } else {
-    Send-APIEmail -counter $counter -api_key $api_key -Recipients $Recipients -From $From -template_id $template_id -Service_Name_Value $Service_Name_Value -Service_Status_Value $Service_Status_Value -error_output_value $error_output_value -Pre_Service_Status_Value $Pre_Service_Status_Value -hostname $hostname
+    Send-APIEmail -counter $counter -api_key $api_key -Recipient $Recipient -From_Name $From_Name -From_email $From_email -ReplyTo_Name $ReplyTo_Name -ReplyTo_email $ReplyTo_email -template_id $template_id -Service_Name_Value $Service_Name_Value -Service_Status_Value $Service_Status_Value -error_output_value $error_output_value -Pre_Service_Status_Value $Pre_Service_Status_Value -hostname $hostname
     Start-Service_Status -Service $service
 }
