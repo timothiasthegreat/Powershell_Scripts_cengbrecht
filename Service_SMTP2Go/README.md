@@ -1,5 +1,4 @@
-# Powershell_Scripts
-Scripts made at work for work, relating to Powershell and other tools
+# SMTP2Go PowerShell Monitor
 
 # Files Included
 index.html - A basic css template for the e-mail template in SMTP2Go   
