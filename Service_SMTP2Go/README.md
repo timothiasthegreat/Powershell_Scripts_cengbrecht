@@ -1,4 +1,4 @@
-# SMTP2Go PowerShell Monitor
+# SMTP2Go PowerShell Service Monitor
 
 # Files Included
 index.html - A basic css template for the e-mail template in SMTP2Go   
